@@ -31,7 +31,7 @@ module.exports = {
 
     try {
       const response = await axios.get("https://ccprojectapis.ddns.net/api/gpt4o-v2", {
-        params: { ask: prompt }
+        params: { prompt: ask }
       });
 
       const result = convertToGothic(response.data.response);
