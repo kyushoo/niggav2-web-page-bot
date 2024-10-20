@@ -1,5 +1,3 @@
-// Assuming 'api' is initialized earlier and has necessary values such as commands, prefix, admin list, etc.
-
 const api = require('./api');
 
 const getStarted = async (send) => {
@@ -22,34 +20,21 @@ const listenMessage = async (event, pageAccessToken) => {
     const senderID = event.sender.id;
     const message = event.message.text;
 
-    // Ensure message and sender are present
     if (!senderID || !message) return;
 
     const send = async text => api.sendMessage(senderID, typeof text === "object" ? text : { text }, pageAccessToken);
 
-    // Handle command processing
-    const [command, ...args] = message.trim().toLowerCase().split(/\s+/).map(arg => arg.trim());
+    const [command, ...args] = message.trim().toLowerCase().split(/\s+/);
     const originalMessage = message.split(' ')[0];
     const admin = api.admin.includes(senderID);
     const hasPrefix = api.prefix && message.startsWith(api.prefix);
 
-    console.log(`Received message: "${message}"`);
-    console.log(`Parsed command: "${command}", Args: "${args}"`);
-
-    // Handle cases where prefix is required but not provided
-    if (api.prefix && !hasPrefix) {
-        return send(`This is a regular message, not a command. My prefix is: "${api.prefix}".`);
-    }
-
-    // Handle simple greetings or non-command phrases
     if (["hi", ".", "chilli", "yo", "get started", "hello", "bot"].includes(message.toLowerCase().trim())) {
         return getStarted(send);
     }
 
-    // If a prefix exists, strip it from the command
     const commandToExecute = hasPrefix ? command.replace(api.prefix, '') : command;
 
-    // Handle command execution if it exists in the api.commands
     if (api.commands.includes(commandToExecute)) {
         try {
             const commandJs = require(api.cmdLoc + `/${commandToExecute}`);
@@ -61,19 +46,18 @@ const listenMessage = async (event, pageAccessToken) => {
             }
             await (commandJs.run || (() => {}))({ api, event, send, admin, args });
         } catch (error) {
-            console.error(`Error executing command "${commandToExecute}":`, error);
             return send(`❌ Failed to execute the command "${originalMessage}".`);
         }
     } else if (hasPrefix) {
-        // Command not found
         return send({
             text: `❌ Command "${originalMessage}" doesn't exist! Type or click (below) help to see available commands.`,
             quick_replies: [{ content_type: "text", title: `help`, payload: "HELP" }]
         });
+    } else {
+        return send(`This is a regular message, not a command. My prefix is: "${api.prefix || 'no prefix configured'}".`);
     }
 };
 
-// Postback handler remains the same
 const listenPostback = async (event, pageAccessToken) => {
     const senderID = event.sender.id;
     const postbackPayload = event.postback.payload;
