@@ -28,21 +28,22 @@ const listenMessage = async (event, pageAccessToken) => {
     const admin = api.admin.includes(senderID);
     const hasPrefix = api.prefix && message.startsWith(api.prefix);
 
-    // Direct handling for the "prefix" command
+    // Handle the prefix command directly
     if (message.toLowerCase().trim() === "prefix") {
         return api.prefix 
             ? send(`My prefix is: "${api.prefix}"`)
             : send(`I don't have a prefix. You can type commands directly.`);
     }
 
+    // Handle greetings and get started trigger without prefix
     if (["hi", ".", "chilli", "yo", "get started", "hello", "bot"].includes(message.toLowerCase().trim())) {
         return getStarted(send);
     }
 
-    // Handle commands only if they start with the prefix (if set)
-    const commandToExecute = hasPrefix ? command.replace(api.prefix, '') : null;
+    // Handle commands with or without prefix
+    const commandToExecute = hasPrefix ? command.replace(api.prefix, '') : command;
 
-    if (commandToExecute && api.commands.includes(commandToExecute)) {
+    if (api.commands.includes(commandToExecute)) {
         try {
             const commandJs = require(api.cmdLoc + `/${commandToExecute}`);
             if (commandJs.admin && !admin) {
@@ -55,7 +56,7 @@ const listenMessage = async (event, pageAccessToken) => {
         } catch (error) {
             return send(`❌ Failed to execute the command "${commandToExecute}".`);
         }
-    } else if (hasPrefix) {
+    } else if (hasPrefix || commandToExecute) {
         return send({
             text: `❌ Command "${commandToExecute}" doesn't exist! Type or click (below) help to see available commands.`,
             quick_replies: [{ content_type: "text", title: `help`, payload: "HELP" }]
