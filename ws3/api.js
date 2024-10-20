@@ -5,7 +5,7 @@ const axios = require("axios");
 const cmdLoc = __dirname + "/commands";
 const temp = __dirname + "/temp";
 const fs = require("fs");
-const prefix = ""; // Set this to the desired prefix, or leave it as an empty string for no prefix.
+const prefix = "";
 const commands = [];
 const descriptions = [];
 
@@ -28,15 +28,20 @@ module.exports = {
       }
       console.log("Wait...");
     });
+
     const dataCmd = await axios.get(`https://graph.facebook.com/v21.0/me/messenger_profile`, {
       params: {
         fields: "commands",
         access_token: PAGE_ACCESS_TOKEN
       }
     });
-    if (dataCmd.data.data[0].commands[0].commands.length === commandsPayload.length) {
+
+    const existingCommands = dataCmd?.data?.data?.[0]?.commands?.[0]?.commands || [];
+
+    if (existingCommands.length === commandsPayload.length) {
       return console.log("Commands not changed");
     }
+
     const loadCmd = await axios.post(`https://graph.facebook.com/v21.0/me/messenger_profile?access_token=${PAGE_ACCESS_TOKEN}`, {
       commands: [
         {
@@ -49,11 +54,13 @@ module.exports = {
         "Content-Type": "application/json"
       }
     });
+
     if (loadCmd.data.result === "success") {
       console.log("Commands loaded!");
     } else {
       console.log("Failed to load commands");
     }
+
     return;
   },
   commands,
@@ -80,7 +87,6 @@ module.exports = {
       });
       const data = sendMsg.data;
       if (data.error) {
-        console.error('Error sending message:', data.error);
         reject(data.error);
       }
       resolve(data);
