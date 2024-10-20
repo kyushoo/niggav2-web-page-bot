@@ -1,23 +1,18 @@
-const fs = require("fs");
-const path = require("path");
 const axios = require("axios");
-const name = "egif";
 
 module.exports = {
-  name,
+  name: "egif",
   description: "Converts an emoji into a GIF",
   async run({ api, send, args }) {
     const emoji = args.join(" ");
-    
-    if (!emoji) {
-      return send(`Usage: ${api.prefix + name} [emoji]`);
-    }
 
-    send("Converting your emoji into a GIF, please wait...");
+    if (!emoji) {
+      return send(`Usage: ${api.prefix}egif [emoji]`);
+    }
 
     try {
       const { data } = await axios.get(`${api.api_josh}/emoji2gif`, {
-        params: { q: emoji }
+        params: { q: emoji },
       });
 
       if (!data || !data.result || !data.result.gif) {
@@ -26,32 +21,19 @@ module.exports = {
 
       const gifUrl = data.result.gif;
 
-      // Download and save the GIF
-      const gifPath = path.resolve(__dirname, 'temp.gif');
-      const response = await axios({
-        url: gifUrl,
-        method: 'GET',
-        responseType: 'stream',
+      await send({
+        attachment: {
+          type: "image",
+          payload: {
+            url: gifUrl,
+          },
+        },
       });
 
-      response.data.pipe(fs.createWriteStream(gifPath));
-
-      response.data.on('end', async () => {
-        await send({
-          attachment: fs.createReadStream(gifPath),
-        });
-        send(`Here is your GIF for the emoji: ${emoji}`);
-        
-        // Optionally, delete the GIF after sending it
-        fs.unlinkSync(gifPath);
-      });
-
-      response.data.on('error', (err) => {
-        throw new Error(`Error while downloading the GIF: ${err.message}`);
-      });
-
+      send(`Here is your GIF for the emoji: ${emoji}`);
     } catch (error) {
+      console.error(error);
       send(`Error while converting emoji to GIF. Please try again.\nDetails: ${error.message || error}`);
     }
-  }
+  },
 };
