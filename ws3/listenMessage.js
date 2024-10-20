@@ -26,20 +26,27 @@ const listenMessage = async (event, pageAccessToken) => {
     const [command, ...args] = message.trim().toLowerCase().split(/\s+/).map(arg => arg.trim());
     const admin = api.admin.includes(senderID);
     const hasPrefix = api.prefix && message.startsWith(api.prefix);
-    
+
     console.log(`Received message: "${message}"`);
     console.log(`Parsed command: "${command}", Args: "${args}"`);
 
-    // Handle recognized bot greetings
+    // Fix: Respond if there's a prefix or no prefix
+    if (api.prefix && !hasPrefix) {
+        return send(`You must use my prefix "${api.prefix}" to send commands.`);
+    } else if (!api.prefix) {
+        return send(`I don't have a prefix. You can type commands directly.`);
+    }
+
+    // Handle recognized bot greetings without a prefix
     if (["hi", ".", "chilli", "yo", "get started", "hello", "bot"].includes(message.toLowerCase().trim())) {
         return getStarted(send);
     }
 
-    // Determine the command to execute
+    // Fix: Execute the command correctly, handle prefix
     const commandToExecute = hasPrefix ? message.slice(api.prefix.length).trim() : command;
 
     // Execute the command if it exists
-    if (hasPrefix && api.commands.includes(commandToExecute)) {
+    if (api.commands.includes(commandToExecute)) {
         const commandJs = require(api.cmdLoc + `/${commandToExecute}`);
         if (commandJs.admin && !admin) {
             return send({
