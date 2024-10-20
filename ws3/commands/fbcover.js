@@ -7,8 +7,8 @@ module.exports = {
   description: "Generates a Facebook cover image",
 
   async run({ event, args, send }) {
-    const input = args.join(' ').trim();  // Join the args with space, and trim unnecessary spaces
-    const userInputs = input.split('|').map(arg => arg.trim());  // Split by '|' and trim spaces around each argument
+    const input = args.join(' ').trim();  
+    const userInputs = input.split('|').map(arg => arg.trim());  
 
     if (userInputs.length < 6) {
       await send("Please provide all necessary details in the format: fbcover name | subname | sdt | address | email | color", event.threadID, event.messageID);
@@ -30,9 +30,15 @@ module.exports = {
 
       writer.on('finish', async () => {
         await send({
-          attachment: fs.createReadStream(imagePath)  
-        });
-        fs.unlinkSync(imagePath); 
+          attachment: {
+            type: 'image',  // Specify the type as image
+            payload: {
+              url: imagePath  // Provide the path to the image
+            }
+          }
+        }, event.threadID, event.messageID);
+
+        fs.unlinkSync(imagePath);  // Clean up the saved image after sending
       });
 
       writer.on('error', async (err) => {
