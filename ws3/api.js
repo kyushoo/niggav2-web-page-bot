@@ -111,6 +111,6 @@ Type ${prefix ? `${prefix}help` : "help"} for available commands.
 
 Note: CHILLIBOT is highly recommended to use Messenger because some features won't work and are limited.
 🤖 Created by Churchill Abing`,
-  api_josh: "https://deku-rest-apis.ooguy.com",
+  api_jonel: "https://ccprojectapis.ddns.net",
   echavie: "https://echavie3.nethprojects.workers.dev"
 };
