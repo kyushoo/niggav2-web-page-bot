@@ -30,11 +30,11 @@ module.exports = {
     send("Processing your request...");
 
     try {
-      const response = await axios.get("https://betadash-api-swordslush.vercel.app/gpt-4-v2", {
+      const response = await axios.get("https://ccprojectapis.ddns.net/api/gpt4o-v2", {
         params: { ask: prompt }
       });
 
-      const result = convertToGothic(response.data.message);
+      const result = convertToGothic(response.data.response);
       const maxMessageLength = 2000;
       const delayBetweenMessages = 1000; // 1 second
 
