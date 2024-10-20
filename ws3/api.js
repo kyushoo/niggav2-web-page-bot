@@ -62,7 +62,7 @@ module.exports = {
   temp,
   prefix,
   admin: [
-    "100087212564100"
+    "8731046750250922"
   ],
   async sendMessage(senderId, message, pageAccessToken) {
     return await new Promise(async (resolve, reject) => {
