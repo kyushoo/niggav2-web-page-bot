@@ -54,7 +54,7 @@ const listenMessage = async (event, pageAccessToken) => {
             quick_replies: [{ content_type: "text", title: `help`, payload: "HELP" }]
         });
     } else {
-        return send(`This is a regular message, not a command. My prefix is: "${api.prefix || 'no prefix configured'}".`);
+        return send(`i dont have prefix "${api.prefix || ''}".`);
     }
 };
 
