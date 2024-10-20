@@ -1,3 +1,5 @@
+const fs = require("fs");
+const path = require("path");
 const axios = require("axios");
 const name = "egif";
 
@@ -24,20 +26,32 @@ module.exports = {
 
       const gifUrl = data.result.gif;
 
-      await send({
-        attachment: {
-          type: "image",
-          payload: {
-            url: gifUrl,
-            is_reusable: true
-          }
-        }
+      // Download and save the GIF
+      const gifPath = path.resolve(__dirname, 'temp.gif');
+      const response = await axios({
+        url: gifUrl,
+        method: 'GET',
+        responseType: 'stream',
       });
 
-      send(`Here is your GIF for the emoji: ${emoji}`);
-      
+      response.data.pipe(fs.createWriteStream(gifPath));
+
+      response.data.on('end', async () => {
+        await send({
+          attachment: fs.createReadStream(gifPath),
+        });
+        send(`Here is your GIF for the emoji: ${emoji}`);
+        
+        // Optionally, delete the GIF after sending it
+        fs.unlinkSync(gifPath);
+      });
+
+      response.data.on('error', (err) => {
+        throw new Error(`Error while downloading the GIF: ${err.message}`);
+      });
+
     } catch (error) {
       send(`Error while converting emoji to GIF. Please try again.\nDetails: ${error.message || error}`);
     }
   }
-}
+};
