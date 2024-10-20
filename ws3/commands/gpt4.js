@@ -31,7 +31,7 @@ module.exports = {
 
     try {
       const response = await axios.get("https://ccprojectapis.ddns.net/api/gpt4o-v2", {
-        params: { prompt: ask }
+        params: { prompt: prompt }
       });
 
       const result = convertToGothic(response.data.response);
@@ -41,10 +41,8 @@ module.exports = {
       if (result.length > maxMessageLength) {
         const messages = splitMessageIntoChunks(result, maxMessageLength);
 
-      
         send(messages[0]);
 
-      
         messages.slice(1).forEach((message, index) => {
           setTimeout(() => send(message), (index + 1) * delayBetweenMessages);
         });
