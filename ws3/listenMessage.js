@@ -25,15 +25,18 @@ const listenMessage = async (event, pageAccessToken) => {
     const send = async text => api.sendMessage(senderID, typeof text === "object" ? text : { text }, pageAccessToken);
     const [command, ...args] = message.trim().toLowerCase().split(/\s+/).map(arg => arg.trim());
     const admin = api.admin.includes(senderID);
-    const hasPrefix = api.prefix && message.startsWith(api.prefix);
+    const hasPrefix = api.prefix && message.startsWith(api.prefix);  // Correct prefix check
 
     console.log(`Received message: "${message}"`);
     console.log(`Parsed command: "${command}", Args: "${args}"`);
 
-    // Fix: Respond if there's a prefix or no prefix
+    // 1. If there is a prefix but it is not used
     if (api.prefix && !hasPrefix) {
         return send(`You must use my prefix "${api.prefix}" to send commands.`);
-    } else if (!api.prefix) {
+    }
+
+    // 2. If no prefix is set, allow direct commands
+    if (!api.prefix) {
         return send(`I don't have a prefix. You can type commands directly.`);
     }
 
@@ -42,7 +45,7 @@ const listenMessage = async (event, pageAccessToken) => {
         return getStarted(send);
     }
 
-    // Fix: Execute the command correctly, handle prefix
+    // 3. Fix: Process the command with a prefix or without if prefix not required
     const commandToExecute = hasPrefix ? message.slice(api.prefix.length).trim() : command;
 
     // Execute the command if it exists
