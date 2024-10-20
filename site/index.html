@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"
+  integrity="sha512-DdX/YwF5e41Ok+AI81HI8f5/5UsoxCVT9GKYZRIzpLxb8Twz4ZwPPX+jQMwMhNQ9b5+zDEefc+dcvQoPWGNZ3g=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css" />
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="favicon.png">
+  <meta property="og:description" content="Bot is successfully running. Check details here">
+  <title>Ws3 Page Bot</title>
+</head>
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
+  <div class="header">
+    <img id="main" style="border: solid 2px #ff00ff; border-radius: 100px;" width="50" height="50"/>
+    <div style="margin-left: 5px">
+      <h4 style="font-weight: 900">Ws3</h4>
+      <p style="margin-left: 0.5px; font-size: 10px">Page Bot</p>
+    </div>
+  </div>
+  <div class="container">
+    <h1>Browser Info</h1>
+    <hr />
+    <ul id="running" style="margin-top: 5px; font-size: 10px; margin-left: 10px">
+      <div id="runningInfo"></div>
+      <div id="runningDt"></div>
+    </ul>
+  </div>
+  <div class="container">
+    <h1>Bot Info</h1>
+    <hr/>
+    <ul id="botInfo" style="margin-top: 5px; font-size: 10px; margin-left: 10px">
+    </ul>
+  </div>
+  <div class="container">
+    <h1>Developer Info</h1>
+    <hr />
+    <ul id="devInfo" style="margin-top: 5px; font-size: 10px; margin-left: 10px">
+    </ul>
+    <div style="animation: slideLeft 1s ease;">
+    <p style="margin: 0; margin-left: 5px; margin-bottom: 3px; font-size: 7px; margin-top: 10px; text-align: left; padding: 0; margin-bottom: 5px; letter-spacing: 2px;">FB PAGE ADMINS</p>
+    <div id="pageAdmins"></div>
+    </div>
+  </div>
+  <div>
+  <button id="restartBot" class="button1">Restart Bot</button>
+  <button id="playMusic" class="button1">Play Music</button>
+  </div>
+  <footer>
+    <p style="font-size: 7px">© 2024 — Ws3 Page Bot</p>
+  </footer>
+  <script src="script.js"></script>
+</body>
+</html>
