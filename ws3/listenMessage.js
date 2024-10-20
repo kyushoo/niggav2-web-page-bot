@@ -23,42 +23,49 @@ const listenMessage = async (event, pageAccessToken) => {
     if (!senderID || !message) return;
 
     const send = async text => api.sendMessage(senderID, typeof text === "object" ? text : { text }, pageAccessToken);
-    const [command, ...args] = message.trim().toLowerCase().split(/\s+/).map(arg => arg.trim());
+
+    const [command, ...args] = message.trim().toLowerCase().split(/\s+/);
     const admin = api.admin.includes(senderID);
-    const hasPrefix = api.prefix && message.startsWith(api.prefix);  // Correct prefix check
+    const hasPrefix = api.prefix && message.startsWith(api.prefix);
 
-    console.log(`Received message: "${message}"`);
-    console.log(`Parsed command: "${command}", Args: "${args}"`);
-
-    // 1. If there is a prefix but it is not used
-    if (api.prefix && !hasPrefix) {
-        return send(`You must use my prefix "${api.prefix}" to send commands.`);
+    // Handle the prefix command directly
+    if (message.toLowerCase().trim() === "prefix") {
+        return api.prefix 
+            ? send(`My prefix is: "${api.prefix}"`)
+            : send(`I don't have a prefix. You can type commands directly.`);
     }
 
-    // 2. If no prefix is set, allow direct commands
-    if (!api.prefix) {
-        return send(`I don't have a prefix. You can type commands directly.`);
-    }
-
-    // Handle recognized bot greetings without a prefix
+    // Handle greetings and get started trigger without prefix
     if (["hi", ".", "chilli", "yo", "get started", "hello", "bot"].includes(message.toLowerCase().trim())) {
         return getStarted(send);
     }
 
-    // 3. Fix: Process the command with a prefix or without if prefix not required
-    const commandToExecute = hasPrefix ? message.slice(api.prefix.length).trim() : command;
+    // Handle the case where no prefix is set, but the user added one
+    if (!api.prefix && hasPrefix) {
+        return send(`❌ This command doesn't need a prefix. Just type the command without the prefix.`);
+    }
 
-    // Execute the command if it exists
+    // Remove prefix if it exists
+    let commandToExecute = command;
+    if (hasPrefix) {
+        commandToExecute = command.replace(api.prefix, '');
+    }
+
+    // Ensure the command can be executed with or without prefix
     if (api.commands.includes(commandToExecute)) {
-        const commandJs = require(api.cmdLoc + `/${commandToExecute}`);
-        if (commandJs.admin && !admin) {
-            return send({
-                text: `❌ Command "${commandToExecute}" is for admins only.`,
-                quick_replies: [{ content_type: "text", title: `help`, payload: "HELP" }]
-            });
+        try {
+            const commandJs = require(api.cmdLoc + `/${commandToExecute}`);
+            if (commandJs.admin && !admin) {
+                return send({
+                    text: `❌ Command "${commandToExecute}" is for admins only.`,
+                    quick_replies: [{ content_type: "text", title: `help`, payload: "HELP" }]
+                });
+            }
+            await (commandJs.run || (() => {}))({ api, event, send, admin, args });
+        } catch (error) {
+            return send(`❌ Failed to execute the command "${commandToExecute}".`);
         }
-        await (commandJs.run || (() => {}))({ api, event, send, admin, args });
-    } else if (hasPrefix) {
+    } else if (hasPrefix || commandToExecute) {
         return send({
             text: `❌ Command "${commandToExecute}" doesn't exist! Type or click (below) help to see available commands.`,
             quick_replies: [{ content_type: "text", title: `help`, payload: "HELP" }]
