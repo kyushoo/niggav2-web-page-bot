@@ -1,9 +1,11 @@
 const axios = require("axios");
+const fs = require("fs");
+const path = require("path");
 const name = "imagine";
 
 module.exports = {
   name,
-  description: "Generates an image based on your prompt using the Chillit's API",
+  description: "Generates an image based on your prompt using Chillit's API",
   async run({ api, send, args }) {
     const prompt = args.join(" ");
     if (!prompt) 
@@ -19,18 +21,38 @@ module.exports = {
       if (!response.data || !response.data.result) throw new Error();
 
       const imageUrl = response.data.result.image;
+      const imagePath = path.join(__dirname, "generated_image.jpg");
 
+      // Download the image and save it locally
+      const imageResponse = await axios({
+        url: imageUrl,
+        method: 'GET',
+        responseType: 'stream'
+      });
+
+      // Save the image to a local file
+      const writer = fs.createWriteStream(imagePath);
+      imageResponse.data.pipe(writer);
+
+      // Wait for the download to complete
+      await new Promise((resolve, reject) => {
+        writer.on('finish', resolve);
+        writer.on('error', reject);
+      });
+
+      // Send the image as an attachment
       await send({
         attachment: {
           type: "image",
           payload: {
-            url: imageUrl,
-            is_reusable: true
+            path: imagePath
           }
         }
       });
 
-      send(`Your image based on the prompt "${prompt}" has been created successfully!\nImage link: ${imageUrl}`);
+      // Optionally, delete the file after sending
+      fs.unlinkSync(imagePath);
+      
     } catch (error) {
       send("Error while generating your image. Please try again.\n" + (error.message || error));
     }
