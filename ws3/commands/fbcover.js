@@ -1,64 +1,61 @@
-const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
+const axios = require("axios");
+const fs = require("fs");
+const path = require("path");
+
+const name = "fbcover";
 
 module.exports = {
-  name: "fbcover",
-  description: "Generates a Facebook cover image",
+  name,
+  description: "Generates a Facebook cover image and sends it as an attachment",
+  async run({ api, send, args }) {
+    // Parse arguments
+    const [fullName, subName, phone, address, email, color = "Cyan"] = args.join(" ").split("|").map(arg => arg.trim());
 
-  async run({ event, args, send }) {
-    const input = args.join(' ').trim();
-    const userInputs = input.split('|').map(arg => arg.trim());
-
-    if (userInputs.length < 6) {
-      await send("Please provide all necessary details in the format: fbcover name | subname | sdt | address | email | color", event.threadID, event.messageID);
-      return;
+    // Check if all necessary arguments are provided
+    if (!fullName || !subName || !phone || !address || !email) {
+      return send(`Usage: ${api.prefix + name} [Name] | [Subname] | [Phone] | [Address] | [Email] | [Color (optional)]`);
     }
 
-    const [name, subname, sdt, address, email, color] = userInputs;
-
     try {
-      await send("Generating your Facebook cover...", event.threadID, event.messageID);
+      // Construct the API URL
+      const url = `https://deku-rest-apis.ooguy.com/canvas/fbcover?name=${encodeURIComponent(fullName)}&subname=${encodeURIComponent(subName)}&sdt=${encodeURIComponent(phone)}&address=${encodeURIComponent(address)}&email=${encodeURIComponent(email)}&color=${encodeURIComponent(color)}&uid=4`;
 
-      // Build the API URL
-      const apiUrl = `https://deku-rest-apis.ooguy.com/canvas/fbcover?name=${encodeURIComponent(name)}&subname=${encodeURIComponent(subname)}&sdt=${encodeURIComponent(sdt)}&address=${encodeURIComponent(address)}&email=${encodeURIComponent(email)}&color=${encodeURIComponent(color)}`;
+      // Define the file path for saving the image
+      const filePath = path.resolve(__dirname, "fbcover_image.jpg");
 
-      // Define the local path to save the cover image
-      const imgPath = path.resolve(__dirname, `${name}_fbcover.png`);
-      const writer = fs.createWriteStream(imgPath);
-
-      // Download the cover image
+      // Fetch the image from the API
       const response = await axios({
-        url: apiUrl,
-        method: 'GET',
-        responseType: 'stream',
+        method: "get",
+        url: url,
+        responseType: "stream",
       });
 
-      // Pipe the response to save the image
+      // Save the image to the file system
+      const writer = fs.createWriteStream(filePath);
       response.data.pipe(writer);
 
-      // When the download finishes, send the image as an attachment
-      writer.on('finish', async () => {
-        const imageData = fs.readFileSync(imgPath);  // Read the file data
-
-        // Send the image as an attachment without any extra reusable options
-        await send({
-          attachment: {
-            type: "image"
-          },
-          file: imageData  // The image data as a file
-        }, event.threadID, event.messageID);
-
-        // Clean up: Delete the image file after sending
-        fs.unlinkSync(imgPath);
+      // Wait until the file is completely written
+      await new Promise((resolve, reject) => {
+        writer.on("finish", resolve);
+        writer.on("error", reject);
       });
 
-      writer.on('error', (error) => {
-        send(`Error downloading the cover image: ${error.message}`);
+      // Send the image as an attachment
+      send({
+        attachment: {
+          type: "image",
+          payload: {
+            url: `file://${filePath}`
+          }
+        }
       });
+
+      // Optionally delete the file after sending
+      fs.unlinkSync(filePath);
 
     } catch (error) {
-      await send(`Failed to generate Facebook cover. Error: ${error.message || error}`);
+      // Error handling
+      send("Error generating the Facebook cover. Please check your input and try again.\n" + (error.message || error));
     }
   }
 };
