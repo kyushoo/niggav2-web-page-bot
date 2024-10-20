@@ -41,13 +41,10 @@ module.exports = {
       writer.on('finish', async () => {
         const imageData = fs.readFileSync(imgPath);  // Read the file data
 
-        // Send the image using the required attachment structure
+        // Send the image as an attachment without any extra reusable options
         await send({
           attachment: {
-            type: "image",  // Change to "image" since it's a Facebook cover image
-            payload: {
-              is_reusable: true  // If supported, mark as reusable
-            }
+            type: "image"
           },
           file: imageData  // The image data as a file
         }, event.threadID, event.messageID);
