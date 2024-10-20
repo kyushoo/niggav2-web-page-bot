@@ -25,36 +25,41 @@ const listenMessage = async (event, pageAccessToken) => {
     const send = async text => api.sendMessage(senderID, typeof text === "object" ? text : { text }, pageAccessToken);
 
     const [command, ...args] = message.trim().toLowerCase().split(/\s+/);
-    const originalMessage = message.split(' ')[0];
     const admin = api.admin.includes(senderID);
     const hasPrefix = api.prefix && message.startsWith(api.prefix);
+
+    // Direct handling for the "prefix" command
+    if (message.toLowerCase().trim() === "prefix") {
+        return api.prefix 
+            ? send(`My prefix is: "${api.prefix}"`)
+            : send(`I don't have a prefix. You can type commands directly.`);
+    }
 
     if (["hi", ".", "chilli", "yo", "get started", "hello", "bot"].includes(message.toLowerCase().trim())) {
         return getStarted(send);
     }
 
-    const commandToExecute = hasPrefix ? command.replace(api.prefix, '') : command;
+    // Handle commands only if they start with the prefix (if set)
+    const commandToExecute = hasPrefix ? command.replace(api.prefix, '') : null;
 
-    if (api.commands.includes(commandToExecute)) {
+    if (commandToExecute && api.commands.includes(commandToExecute)) {
         try {
             const commandJs = require(api.cmdLoc + `/${commandToExecute}`);
             if (commandJs.admin && !admin) {
                 return send({
-                    text: `❌ Command "${originalMessage}" is for admins only.`,
+                    text: `❌ Command "${commandToExecute}" is for admins only.`,
                     quick_replies: [{ content_type: "text", title: `help`, payload: "HELP" }]
                 });
             }
             await (commandJs.run || (() => {}))({ api, event, send, admin, args });
         } catch (error) {
-            return send(`❌ Failed to execute the command "${originalMessage}".`);
+            return send(`❌ Failed to execute the command "${commandToExecute}".`);
         }
     } else if (hasPrefix) {
         return send({
-            text: `❌ Command "${originalMessage}" doesn't exist! Type or click (below) help to see available commands.`,
+            text: `❌ Command "${commandToExecute}" doesn't exist! Type or click (below) help to see available commands.`,
             quick_replies: [{ content_type: "text", title: `help`, payload: "HELP" }]
         });
-    } else {
-        return send(`i dont have prefix "${api.prefix || ''}".`);
     }
 };
 
