@@ -40,9 +40,18 @@ const listenMessage = async (event, pageAccessToken) => {
         return getStarted(send);
     }
 
-    // Handle commands with or without prefix
-    const commandToExecute = hasPrefix ? command.replace(api.prefix, '') : command;
+    // Handle the case where no prefix is set, but the user added one
+    if (!api.prefix && hasPrefix) {
+        return send(`❌ This command doesn't need a prefix. Just type the command without the prefix.`);
+    }
 
+    // Remove prefix if it exists
+    let commandToExecute = command;
+    if (hasPrefix) {
+        commandToExecute = command.replace(api.prefix, '');
+    }
+
+    // Ensure the command can be executed with or without prefix
     if (api.commands.includes(commandToExecute)) {
         try {
             const commandJs = require(api.cmdLoc + `/${commandToExecute}`);
