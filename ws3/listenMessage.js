@@ -23,49 +23,32 @@ const listenMessage = async (event, pageAccessToken) => {
     if (!senderID || !message) return;
 
     const send = async text => api.sendMessage(senderID, typeof text === "object" ? text : { text }, pageAccessToken);
-
-    const [command, ...args] = message.trim().toLowerCase().split(/\s+/);
+    const [command, ...args] = message.trim().toLowerCase().split(/\s+/).map(arg => arg.trim());
     const admin = api.admin.includes(senderID);
     const hasPrefix = api.prefix && message.startsWith(api.prefix);
+    
+    console.log(`Received message: "${message}"`);
+    console.log(`Parsed command: "${command}", Args: "${args}"`);
 
-    // Handle the prefix command directly
-    if (message.toLowerCase().trim() === "prefix") {
-        return api.prefix 
-            ? send(`My prefix is: "${api.prefix}"`)
-            : send(`I don't have a prefix. You can type commands directly.`);
-    }
-
-    // Handle greetings and get started trigger without prefix
+    // Handle recognized bot greetings
     if (["hi", ".", "chilli", "yo", "get started", "hello", "bot"].includes(message.toLowerCase().trim())) {
         return getStarted(send);
     }
 
-    // Handle the case where no prefix is set, but the user added one
-    if (!api.prefix && hasPrefix) {
-        return send(`❌ This command doesn't need a prefix. Just type the command without the prefix.`);
-    }
+    // Determine the command to execute
+    const commandToExecute = hasPrefix ? message.slice(api.prefix.length).trim() : command;
 
-    // Remove prefix if it exists
-    let commandToExecute = command;
-    if (hasPrefix) {
-        commandToExecute = command.replace(api.prefix, '');
-    }
-
-    // Ensure the command can be executed with or without prefix
-    if (api.commands.includes(commandToExecute)) {
-        try {
-            const commandJs = require(api.cmdLoc + `/${commandToExecute}`);
-            if (commandJs.admin && !admin) {
-                return send({
-                    text: `❌ Command "${commandToExecute}" is for admins only.`,
-                    quick_replies: [{ content_type: "text", title: `help`, payload: "HELP" }]
-                });
-            }
-            await (commandJs.run || (() => {}))({ api, event, send, admin, args });
-        } catch (error) {
-            return send(`❌ Failed to execute the command "${commandToExecute}".`);
+    // Execute the command if it exists
+    if (hasPrefix && api.commands.includes(commandToExecute)) {
+        const commandJs = require(api.cmdLoc + `/${commandToExecute}`);
+        if (commandJs.admin && !admin) {
+            return send({
+                text: `❌ Command "${commandToExecute}" is for admins only.`,
+                quick_replies: [{ content_type: "text", title: `help`, payload: "HELP" }]
+            });
         }
-    } else if (hasPrefix || commandToExecute) {
+        await (commandJs.run || (() => {}))({ api, event, send, admin, args });
+    } else if (hasPrefix) {
         return send({
             text: `❌ Command "${commandToExecute}" doesn't exist! Type or click (below) help to see available commands.`,
             quick_replies: [{ content_type: "text", title: `help`, payload: "HELP" }]
