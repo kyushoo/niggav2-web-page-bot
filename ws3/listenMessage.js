@@ -36,7 +36,7 @@ const listenMessage = async (event, pageAccessToken) => {
     }
 
     // Handle greetings and get started trigger without prefix
-    if (["hi", ".", "chilli", "yo", "get started", "hello", "bot"].includes(message.toLowerCase().trim())) {
+    if (["hi", ".", "kyles", "yo", "get started", "hello", "bot"].includes(message.toLowerCase().trim())) {
         return getStarted(send);
     }
 
