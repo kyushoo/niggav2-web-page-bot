@@ -62,7 +62,7 @@ module.exports = {
   temp,
   prefix,
   admin: [
-    "8731046750250922"
+    "61565022752745"
   ],
   async sendMessage(senderId, message, pageAccessToken) {
     return await new Promise(async (resolve, reject) => {
@@ -104,13 +104,13 @@ module.exports = {
       resolve(res.data);
     });
   },
-  introduction: `Hello, I am CHILLIBOT, your assistant.
+  introduction: `Hello, I am KYLESBOT, your assistant.
 ${prefix ? `My prefix is "${prefix}".` : "I don't use a prefix, you can just type commands directly."}
 
 Type ${prefix ? `${prefix}help` : "help"} for available commands.
 
-Note: CHILLIBOT is highly recommended to use Messenger because some features won't work and are limited.
-🤖 Created by Churchill Abing`,
+Note: KYLESBOT is highly recommended to use Messenger because some features won't work and are limited.
+🤖 Created by Kyle Bait-it`,
   api_jonel: "https://ccprojectapis.ddns.net",
   echavie: "https://echavie3.nethprojects.workers.dev"
 };
