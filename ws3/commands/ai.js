@@ -1,14 +1,14 @@
 const axios = require("axios");
 
 module.exports = {
-  name: "gpt4",
+  name: "ai",
   description: "Interact with GPT-4 using a custom API and receive responses in Gothic font.",
-  author: "Churchill",
+  author: "kylepogi",
 
   async execute(senderId, args, pageAccessToken, sendMessage) {
     const prompt = args.join(" ");
     if (!prompt) {
-      return sendMessage(senderId, { text: `Usage: gpt4 [your question]` }, pageAccessToken);
+      return sendMessage(senderId, { text: `Usage: ai [your question]` }, pageAccessToken);
     }
 
     sendMessage(senderId, { text: "Processing your request..." }, pageAccessToken);
