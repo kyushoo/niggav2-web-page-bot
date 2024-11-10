@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = {
   name: "shoti",
-  description: "Nagpapadala ng random na Chilli video",
+  description: "Nagpapadala ng random na shoti video",
 
   async run({ event, send }) {
     try {
@@ -21,7 +21,7 @@ module.exports = {
       });
 
     } catch (error) {
-      await send(`Nabigong kunin ang Chilli video. Error: ${error.message || error}`);
+      await send(`Nabigong kunin ang shoti video. Error: ${error.message || error}`);
     }
   }
 };
