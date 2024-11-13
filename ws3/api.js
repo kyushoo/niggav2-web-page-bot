@@ -5,7 +5,7 @@ const axios = require("axios");
 const cmdLoc = __dirname + "/commands";
 const temp = __dirname + "/temp";
 const fs = require("fs");
-const prefix = "."; // Set this to the desired prefix, or leave it as an empty string for no prefix.
+const prefix = "/"; // Set this to the desired prefix, or leave it as an empty string for no prefix.
 const commands = [];
 const descriptions = [];
 
