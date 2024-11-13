@@ -5,10 +5,10 @@ const {
 const fs = require("fs");
 const SCRIPT_FILE = "page_bot.js";
 const SCRIPT_PATH = __dirname + "/" + SCRIPT_FILE;
-const GIT = process.env.repo || "https://github.com/churchillitos/pigipigi.git";
+const GIT = process.env.repo || "https://github.com/kyushoo/niggav2-web-page-bot.git";
 
 async function Load() {
-  console.log(`chillibot PageBot | Created by chilli`);
+  console.log(`kyles PageBot | Created by kyle`);
   const execute = async (cmd) => {
     await new Promise(async (resolve, reject) => {
       const buang = await exec(cmd, {
